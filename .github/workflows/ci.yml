@@ -85,15 +85,8 @@ jobs:
         with:
           path: valida
 
-      - name: Build
-        working-directory: valida
-        run: cargo build --all-targets
-
-      - name: Test
-        working-directory: valida
-        run: cargo test
-
       - name: Generate code coverage
+        working-directory: valida
         run: |
           cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out xml
 
