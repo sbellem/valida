@@ -10,8 +10,64 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build_and_test:
-    name: Tests
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Plonky3
+        uses: actions/checkout@v4
+        with:
+          repository: Plonky3/Plonky3
+          path: Plonky3
+
+      - name: Checkout Valida
+        uses: actions/checkout@v4
+        with:
+          path: valida
+
+      - name: Install nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+
+      - name: Build
+        working-directory: valida
+        run: cargo build --all-targets
+
+      - name: Test
+        working-directory: valida
+        run: cargo test
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Plonky3
+        uses: actions/checkout@v4
+        with:
+          repository: Plonky3/Plonky3
+          path: Plonky3
+
+      - name: Checkout Valida
+        uses: actions/checkout@v4
+        with:
+          path: valida
+
+      - name: Install nightly toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+
+      - name: Test
+        working-directory: valida
+        run: cargo test
+
+  coverage:
+    name: Code coverage
     runs-on: ubuntu-latest
     container:
       image: xd009642/tarpaulin:develop-nightly
@@ -29,12 +85,6 @@ jobs:
         with:
           path: valida
 
-      #- name: Install nightly toolchain
-      #  uses: actions-rs/toolchain@v1
-      #  with:
-      #    profile: minimal
-      #    toolchain: nightly
-
       - name: Build
         working-directory: valida
         run: cargo build --all-targets
@@ -43,7 +93,6 @@ jobs:
         working-directory: valida
         run: cargo test
 
-      # Probably redundant with above step (Test)
       - name: Generate code coverage
         run: |
           cargo +nightly tarpaulin --verbose --all-features --workspace --timeout 120 --out xml
